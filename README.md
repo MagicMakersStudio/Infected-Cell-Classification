@@ -60,6 +60,6 @@ flask run
 
 ### Remerciement
 
-* * Merci à [Kaggle](https://www.kaggle.com/) pour le dataset
+* Merci à [Kaggle](https://www.kaggle.com/) pour le dataset
 * Merci à [Magic Makers](https://www.magicmakers.fr/)
 * Merci à [Keras](https://keras.io/) pour faciliter la création de réseaux de neurones !
