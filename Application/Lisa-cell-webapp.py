@@ -6,9 +6,8 @@
 # machine learning
 import keras
 import numpy as np
-from keras.models import load_model
+from keras.models import load_model, Sequential
 from keras.utils import to_categorical
-from keras.models import Sequential
 from keras.layers import Dense, Conv2D, MaxPooling2D, Flatten
 from keras.layers.advanced_activations import LeakyReLU
 from keras.optimizers import Adam
@@ -19,14 +18,10 @@ from PIL import Image
 from glob import glob
 from tqdm import tqdm
 # webapp
-from flask import Flask
-from flask import send_from_directory
-from flask import request
-from flask import Flask, render_template
-from keras.models import load_model
-from flask import Flask, flash, request, redirect, url_for
+from flask import Flask, flash, request, redirect, url_for, render_template, send_from_directory, request
 from werkzeug.utils import secure_filename
 import os
+import tensorflow as tf
 
 #-=-=-=-=-=-=-=-=-=-=-#
 #    CRÉER UNE APP    #
@@ -43,7 +38,7 @@ app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 
 K.clear_session()
 model = load_model("model.h5")
-
+graph = tf.get_default_graph()
 #-=-=-=-=-=-=-=-=-=-=-#
 #  PAGE POUR UPLOAD   #
 #-=-=-=-=-=-=-=-=-=-=-#
@@ -90,20 +85,22 @@ def upload_file():
 @app.route('/analyse')
 def anlyse():
     file = glob("imageenregistre/*.png")
-    for image in tqdm(file):
-        imgi = Image.open(image).convert("L").resize((100, 100))
-        imgi = np.array(imgi)
-        imgi = imgi.reshape(100, 100,1)
-        imgi = imgi.astype('float32')
-        imgi /= 255
-        imgi = np.expand_dims(imgi, 0)
-        predicty = model.predict(imgi)
-        predicty = np.argmax(predicty)
+    global graph
+    with graph.as_default():
+        for image in tqdm(file):
+            imgi = Image.open(image).convert("L").resize((100, 100))
+            imgi = np.array(imgi)
+            imgi = imgi.reshape(100, 100,1)
+            imgi = imgi.astype('float32')
+            imgi /= 255
+            imgi = np.expand_dims(imgi, 0)
+            predicty = model.predict(imgi)
+            predicty = np.argmax(predicty)
 
-        if predicty == 0 :
-            lien = "infected"
-        if predicty == 1 :
-            lien = "uninfected"
+            if predicty == 0 :
+                lien = "infected"
+            if predicty == 1 :
+                lien = "uninfected"
 
     return redirect(url_for(lien))
 
